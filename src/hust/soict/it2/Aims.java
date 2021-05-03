@@ -1,20 +1,25 @@
 package hust.soict.it2;
 
-import hust.soict.it2.aims.disc.DigitalVideoDisc;
+import hust.soict.it2.aims.exception.aims.ExcessiveException;
+import hust.soict.it2.aims.media.Book;
+import hust.soict.it2.aims.media.DigitalVideoDisc;
 import hust.soict.it2.aims.exception.aims.NotFoundException;
 import hust.soict.it2.aims.list.orderList;
+import hust.soict.it2.aims.media.Media;
 import hust.soict.it2.aims.order.Order;
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Aims {
     private static final orderList list = new orderList();
-    private static String title, category, director;
+    private static String title, category, director, id, content;
+    private static String[] authors;
     private static Integer length = null;
     private static Float cost = null;
     private static boolean check;
-    private static final Order order = new Order();
+    private static Order order;
 
     public static void init() {
         int option = JOptionPane.showConfirmDialog(null, "Hi, wanna buy some disc? You can order up to 5 orders, and maximum of 3 discs per order. Press OK to start or Cancel to exit.",
@@ -23,26 +28,26 @@ public class Aims {
             while (true) {
                 do {
                     check = true;
-                    String str = JOptionPane.showInputDialog(null, "What do you want to do with your order?\n 1. Add an Order.\n 2. Remove an Order.\n 3. Print an Order.\n 4. Search for items.\n 5. I'm feeling lucky.\n ", "Choose Option", JOptionPane.PLAIN_MESSAGE);
+                    String str = JOptionPane.showInputDialog(null, "What do you want to do with your order?\n 1. Create new Order.\n 2. Modify an Order.\n 3. Remove an Order.\n 4. Print an Order.\n 5. Search for items.\n 6. I'm feeling lucky.\n ", "Choose Option", JOptionPane.PLAIN_MESSAGE);
                     switch (str) {
                         case "1":
                             addOrder();
                             break;
                         case "2":
-                            removeOrder();
+                            modifyOrder();
                             break;
                         case "3":
-                            printOrder();
+                            removeOrder();
                             break;
                         case "4":
-                            search();
+                            printOrder();
                             break;
                         case "5":
+                            search();
+                            break;
+                        case "6":
                             lucky();
                             break;
-                        case "":
-                            //if (str.equals(null))
-                                return;
                         default:
                             check = false;
                             JOptionPane.showMessageDialog(null,"Try again.");
@@ -54,20 +59,67 @@ public class Aims {
 
     public static void addOrder() {
         if (list.full()) {
-            JOptionPane.showMessageDialog(null,"Your order list is full! You can not add any more orders.");
+            JOptionPane.showMessageDialog(null, "Your order list is full! You can not add any more orders.");
+            return;
+        } else {
+            order = new Order();
+            JOptionPane.showMessageDialog(null, "Order " + (list.size() + 1) + " is created successfully! Now you can add items to it.");
+            addItem(order);
+            if (order.getItemsOrdered().size() == 0) {
+                JOptionPane.showMessageDialog(null, "No orders added!");
+            } else {
+                list.add(order);
+                JOptionPane.showMessageDialog(null, "Order " + list.size() + " is added to list successfully!\nOrder cost: " + order.total());
+                if (list.full())
+                    JOptionPane.showMessageDialog(null, "Your list is full! You can not add any more orders.");
+            }
             return;
         }
+    }
+
+    public static void modifyOrder() {
+        if (list.size() == 0) {
+            JOptionPane.showMessageDialog(null,"Your order list is empty!");
+            return;
+        }
+
         do {
             check = true;
-            String str = JOptionPane.showInputDialog(null, "Type add option for Order:\n 1. Add an item.\n 2. Add two items\n 3. Add a list of items.", "Add items", JOptionPane.PLAIN_MESSAGE);
-            switch (str) {
-                case "1" -> add();
-                case "2" -> add2Items();
-                case "3" -> addList();
-                default -> {
+            String str = JOptionPane.showInputDialog(null, "Choose Order to modify.", "Modify Order", JOptionPane.PLAIN_MESSAGE);
+            try {
+                int option = Integer.parseInt(str);
+                if (option < 1 || option > list.size()) {
                     check = false;
                     JOptionPane.showMessageDialog(null, "Try again.");
+                } else {
+                    while (true) {
+                        do {
+                            String string = JOptionPane.showInputDialog(null, "What do you want to do with your order?\n 1. Add an item.\n 2. Modify an item.\n 3. Remove an item.\n 4. Print the Order.\n", "Choose Option", JOptionPane.PLAIN_MESSAGE);
+                            switch (string) {
+                                case "1":
+                                    addItem(list.get(option - 1));
+                                    break;
+                                case "2":
+                                    modifyItem(list.get(option - 1));
+                                    break;
+                                case "3":
+                                    removeItem(list.get(option - 1));
+                                    break;
+                                case "4":
+                                    printOrder();
+                                    break;
+                                default:
+                                    check = false;
+                                    JOptionPane.showMessageDialog(null,"Try again.");
+                            }
+                        } while (!check);
+                    }
                 }
+            } catch (NumberFormatException e) {
+                check = false;
+                JOptionPane.showMessageDialog(null,"You must type an Integer!");
+            } catch (NullPointerException e) {
+                return;
             }
         } while (!check);
     }
@@ -102,6 +154,7 @@ public class Aims {
     }
 
     public static void printOrder() {
+        //JOptionPane.showMessageDialog(null, "This feature is under maintainance. It will be available in the near future.");
         if (list.size() == 0) {
             JOptionPane.showMessageDialog(null,"Your order list is empty!");
             return;
@@ -123,245 +176,214 @@ public class Aims {
         StringBuilder message = new StringBuilder();
         message.append("**********************ORDER #").append(x).append("************************\nDate: ").append(list.get(x - 1).getDateOrder()).append("\nOrdered items:\n");
         int d = 0;
-        for (DigitalVideoDisc disc : list.get(x - 1).getItemsOrdered()) message.append(" ").append(++d).append(". DVD - ").append(disc.getTitle()).append(" - ").append(disc.getCategory()).append(" - ").append(disc.getDirector()).append(" - ").append(disc.getLength()).append(": $").append(disc.getCost()).append("\n");
+        for (Media item : list.get(x - 1).getItemsOrdered()){
+            
+            message.append(" ").append(++d).append(". DVD - ").append(item.getTitle()).append(" - ").append(item.getCategory()).append(" - ").append(item.getDirector()).append(" - ").append(item.getLength()).append(": $").append(item.getCost()).append("\n");
+        }
         message.append("----------\nTotal cost: $").append(list.get(x - 1).total()).append("\n******************************************************");
         System.out.println(message);
         JOptionPane.showMessageDialog(null,message);
     }
 
-    public static void add() {
-        Order order = new Order();
+    public static void addItem(Order order) {
+        if (order.full()) {
+            JOptionPane.showMessageDialog(null, "The order is full. You can't add any more items!");
+            return;
+        }
         while (true) {
             JTextField Title = new JTextField(),
-                       Category = new JTextField(),
-                       Director = new JTextField(),
-                       Length = new JTextField(),
-                       Cost = new JTextField();
-            Object[] message = new Object[] {
-                    "Enter information of the Disc. Press Cancel to exit.\n",
-                    "Title:", Title,
-                    "Category:", Category,
-                    "Director:", Director,
-                    "Length:", Length,
-                    "Cost:", Cost,
-            };
-
+                    Category = new JTextField(),
+                    Director = new JTextField(),
+                    Length = new JTextField(),
+                    Cost = new JTextField(),
+                    ID = new JTextField(),
+                    Authors = new JTextField(),
+                    Content = new JTextField();
+            Object[] message;
+            int option;
             do {
                 check = true;
-                int option = JOptionPane.showConfirmDialog(null, message, "Add a disc", JOptionPane.OK_CANCEL_OPTION);
-                if (option == JOptionPane.OK_OPTION) {
-                    title = Title.getText();
-                    category = Category.getText();
-                    director = Director.getText();
+                try {
+                    String str = JOptionPane.showInputDialog("What do you choose? Press Cancel to add your order to list.\n 1. DVD\n 2. Book\n 3. CD\n");
+                    if (str.equals(null)) return;
                     try {
-                        length = Integer.parseInt(Length.getText());
-                    } catch (NumberFormatException e) {
-                        check = false;
-                    }
-                    try {
-                        cost = Float.parseFloat(Cost.getText());
-                    } catch (NumberFormatException e) {
-                        check = false;
-                    }
-                    if (!check) JOptionPane.showMessageDialog(null, "Try again.");
-                }
-                else {
-                    try {
-                        if (order.getItemsOrdered().size() != 0) list.add(order);
-                        else {
-                            JOptionPane.showMessageDialog(null,"No items added!");
-                            return;
+                        option = Integer.parseInt(str);
+                        switch (option) {
+                            case 1:
+                                message = new Object[]{
+                                        "Enter information of the Disc. Press Cancel to exit.\n",
+                                        "ID", ID,
+                                        "Title:", Title,
+                                        "Category:", Category,
+                                        "Director:", Director,
+                                        "Length:", Length,
+                                        "Cost:", Cost,
+                                };
+                                option = JOptionPane.showConfirmDialog(null, message, "Add a disc", JOptionPane.OK_CANCEL_OPTION);
+
+                                if (option == JOptionPane.OK_OPTION) {
+                                    title = Title.getText();
+                                    category = Category.getText();
+                                    director = Director.getText();
+
+                                    try {
+                                        int test = Integer.parseInt(ID.getText());
+                                        id = ID.getText();
+                                        length = Integer.parseInt(Length.getText());
+                                        cost = Float.parseFloat(Cost.getText());
+                                        DigitalVideoDisc disc = new DigitalVideoDisc(id, title, category, director, length, cost);
+
+                                        try {
+                                            order.addMedia(disc);
+                                            message = new Object[] {
+                                                    "Your disc has been added successfully!",
+                                                    "ID: " + id,
+                                                    "Title: " + title,
+                                                    "Category: " + category,
+                                                    "Director: " + director,
+                                                    "Length: " + length,
+                                                    "Cost: " + cost,
+                                            };
+                                            JOptionPane.showMessageDialog(null, message);
+                                            JOptionPane.showMessageDialog(null, "Total cost: " + order.total());
+                                        } catch (ExcessiveException e) {
+                                            message = new Object[] {
+                                                    "Your book has been added successfully!",
+                                                    "ID: " + id,
+                                                    "Title: " + title,
+                                                    "Category: " + category,
+                                                    "Authors: " + Authors.getText(),
+                                                    "Content: " + content,
+                                                    "Cost: " + cost,
+                                            };
+                                            JOptionPane.showMessageDialog(null, message);
+                                            JOptionPane.showMessageDialog(null, "Total cost: " + order.total());
+                                            JOptionPane.showMessageDialog(null, "The order is now full. You can't add any more items!");
+                                            return;
+                                        }
+                                    } catch (NumberFormatException e) {
+                                        check = false;
+                                        JOptionPane.showMessageDialog(null, "Try again.");
+                                    }
+                                } else break;
+                                break;
+
+                            case 2:
+                                message = new Object[]{
+                                        "Enter information of the Book. Press Cancel to exit.\n",
+                                        "ID:", ID,
+                                        "Title:", Title,
+                                        "Category:", Category,
+                                        "Authors:", Authors,
+                                        "Content:", Content,
+                                        "Cost:", Cost,
+                                };
+                                option = JOptionPane.showConfirmDialog(null, message, "Add a disc", JOptionPane.OK_CANCEL_OPTION);
+
+                                if (option == JOptionPane.OK_OPTION) {
+                                    title = Title.getText();
+                                    category = Category.getText();
+                                    authors = Authors.getText().split(";");
+                                    content = Content.getText();
+
+                                    try {
+                                        int test = Integer.parseInt(ID.getText());
+                                        id = ID.getText();
+                                        cost = Float.parseFloat(Cost.getText());
+                                        Book book = new Book(id, title, category, authors, content, cost);
+
+                                        try {
+                                            order.addMedia(book);
+                                            message = new Object[] {
+                                                    "Your book has been added successfully!",
+                                                    "ID: " + id,
+                                                    "Title: " + title,
+                                                    "Category: " + category,
+                                                    "Authors: " + Authors.getText(),
+                                                    "Content: " + content,
+                                                    "Cost: " + cost,
+                                            };
+                                            JOptionPane.showMessageDialog(null, message);
+                                            JOptionPane.showMessageDialog(null, "Total cost: " + order.total());
+                                        } catch (ExcessiveException e) {
+                                            message = new Object[] {
+                                                    "Your book has been added successfully!",
+                                                    "ID: " + id,
+                                                    "Title: " + title,
+                                                    "Category: " + category,
+                                                    "Authors: " + Authors.getText(),
+                                                    "Content: " + content,
+                                                    "Cost: " + cost,
+                                            };
+                                            JOptionPane.showMessageDialog(null, message);
+                                            JOptionPane.showMessageDialog(null, "Total cost: " + order.total());
+                                            JOptionPane.showMessageDialog(null, "The order is now full. You can't add any more items!");
+                                            return;
+                                        }
+                                    } catch (NumberFormatException e) {
+                                        check = false;
+                                        JOptionPane.showMessageDialog(null, "Try again.");
+                                    }
+                                } else break;
+                                break;
+                            case 3:
+
                         }
-                    } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null,"Your order list is full! You can not add any more orders.");
+                    } catch (NumberFormatException e) {
+                        check = false;
+                        JOptionPane.showMessageDialog(null,"You must type an Integer!");
                     }
-                    JOptionPane.showMessageDialog(null,"Total cost: " + order.total());
+
+                } catch (NullPointerException e) {
                     return;
                 }
             } while (!check);
-            DigitalVideoDisc disc = new DigitalVideoDisc(title, category, director, length, cost);
+
+        }
+    }
+
+    public static void modifyItem(Order order) {
+        JOptionPane.showMessageDialog(null, "This feature is under maintainance. It will be available in the near future.");
+        /*do {
+            check = true;
+            String str = JOptionPane.showInputDialog(null, "Choose item to modify.", "Modify Item", JOptionPane.PLAIN_MESSAGE);
             try {
-                order.addDVD(disc);
-                message = new Object[] {
-                        "Your disc has been added successfully!",
-                        "Title: " + title,
-                        "Category: " + category,
-                        "Director: " + director,
-                        "Length: " + length,
-                        "Cost: " + cost,
-                };
-                JOptionPane.showMessageDialog(null, message);
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(null,"The queue is now full. You can't add any more items!");
-                JOptionPane.showMessageDialog(null,"Total cost: " + order.total());
-                try {
-                    if (order.getItemsOrdered().size() != 0) list.add(order);
-                    else {
-                        JOptionPane.showMessageDialog(null,"No items added!");
-                        return;
-                    }
-                } catch (Exception e1) {
-                    JOptionPane.showMessageDialog(null,"Your order list is full! You can not add any more orders.");
+                int option = Integer.parseInt(str);
+                if (option < 1 || option > order.getItemsOrdered().size()) {
+                    check = false;
+                    JOptionPane.showMessageDialog(null, "Try again.");
+                } else {
+
                 }
+            } catch (NumberFormatException e) {
+                check = false;
+                JOptionPane.showMessageDialog(null,"You must type an Integer!");
+            } catch (NullPointerException e) {
                 return;
             }
-        }
+        } while (!check);*/
     }
 
-    public static void addList() {
-        Order order = new Order();
-        List<DigitalVideoDisc> discList = new ArrayList<>();
-        while (true) {
-            JTextField Title = new JTextField(),
-                    Category = new JTextField(),
-                    Director = new JTextField(),
-                    Length = new JTextField(),
-                    Cost = new JTextField();
-            Object[] message = new Object[] {
-                    "Enter information of the Disc " + (discList.size() + 1) + ". Press Cancel to exit.\n",
-                    "Title:", Title,
-                    "Category:", Category,
-                    "Director:", Director,
-                    "Length:", Length,
-                    "Cost:", Cost,
-            };
-
-            do {
-                check = true;
-                int option = JOptionPane.showConfirmDialog(null, message, "Add a list of discs", JOptionPane.OK_CANCEL_OPTION);
-                if (option == JOptionPane.OK_OPTION) {
-                    title = Title.getText();
-                    category = Category.getText();
-                    director = Director.getText();
-                    try {
-                        length = Integer.parseInt(Length.getText());
-                    } catch (NumberFormatException e) {
-                        check = false;
-                    }
-                    try {
-                        cost = Float.parseFloat(Cost.getText());
-                    } catch (NumberFormatException e) {
-                        check = false;
-                    }
-                    if (check) {
-                        discList.add(new DigitalVideoDisc(title,category,director,length,cost));
-                    } else JOptionPane.showMessageDialog(null, "Try again.");
-                }
-                else {
-                    try {
-                        if (discList.size() != 0) {
-                            order.addDVD(discList);
-                            JOptionPane.showMessageDialog(null, "Your order is added successfully!\nTotal cost: " + order.total());
-                        } else {
-                            JOptionPane.showMessageDialog(null, "No items added!");
-                            return;
-                        }
-                    } catch (Exception e) {
-                        int d = Integer.parseInt(e.getMessage());
-                        StringBuilder info = new StringBuilder("Only " + d + "/" + discList.size() + " disc(s) are successfully added!\nItems not added: ");
-                        for (int i = d; i < discList.size(); i++) {
-                            info.append(discList.get(i).getTitle());
-                            if (i != discList.size() - 1) info.append(", ");
-                            else info.append(".");
-                        }
-                        JOptionPane.showMessageDialog(null, info.toString(),"Error",JOptionPane.PLAIN_MESSAGE);
-                    }
-                    try {
-                        if (order.getItemsOrdered().size() != 0) list.add(order);
-                        else {
-                            JOptionPane.showMessageDialog(null,"No items added!");
-                            return;
-                        }
-                    } catch (Exception e1) {
-                        JOptionPane.showMessageDialog(null,"Your order list is full! You can not add any more orders.");
-                    }
-                    return;
-                }
-            } while (!check);
-        }
-    }
-
-    public static void add2Items(){
-        Order order = new Order();
-        List<DigitalVideoDisc> discList = new ArrayList<>();
-        while (discList.size() < 2) {
-            JTextField Title = new JTextField(),
-                    Category = new JTextField(),
-                    Director = new JTextField(),
-                    Length = new JTextField(),
-                    Cost = new JTextField();
-            Object[] message = new Object[] {
-                    "Enter information of the Disc " + (discList.size() + 1) + ". Press Cancel to exit.\n",
-                    "Title:", Title,
-                    "Category:", Category,
-                    "Director:", Director,
-                    "Length:", Length,
-                    "Cost:", Cost,
-            };
-
-            do {
-                check = true;
-                int option = JOptionPane.showConfirmDialog(null, message, "Add 2 discs", JOptionPane.OK_CANCEL_OPTION);
-                if (option == JOptionPane.OK_OPTION) {
-                    title = Title.getText();
-                    category = Category.getText();
-                    director = Director.getText();
-                    try {
-                        length = Integer.parseInt(Length.getText());
-                    } catch (NumberFormatException e) {
-                        check = false;
-                    }
-                    try {
-                        cost = Float.parseFloat(Cost.getText());
-                    } catch (NumberFormatException e) {
-                        check = false;
-                    }
-                    if (check) {
-                        discList.add(new DigitalVideoDisc(title,category,director,length,cost));
-                    } else JOptionPane.showMessageDialog(null, "Try again.");
-                }
-                else return;
-            } while (!check);
-        }
-        try {
-                order.addDVD(discList.get(0), discList.get(1));
-                JOptionPane.showMessageDialog(null, "Your order is added successfully!\nTotal cost: " + order.total());
-        } catch (Exception e) {
-                int d = Integer.parseInt(e.getMessage());
-                StringBuilder info = new StringBuilder("Only " + d + "/" + discList.size() + " disc(s) are successfully added!\nItems not added: ");
-                for (int i = d; i < discList.size(); i++) {
-                    info.append(discList.get(i).getTitle());
-                    if (i != discList.size() - 1) info.append(", ");
-                    else info.append(".");
-                }
-                JOptionPane.showMessageDialog(null, info.toString(), "Error", JOptionPane.PLAIN_MESSAGE);
-        }
-        try {
-            list.add(order);
-        } catch (Exception e1) {
-            JOptionPane.showMessageDialog(null,"Your order list is full! You can not add any more orders.");
-        }
-    }
-
-    public static void remove() {
+    public static void removeItem(Order order){
         do {
-            String title = JOptionPane.showInputDialog(null,"Input the disc's title you want to delete: ","Delete items", JOptionPane.INFORMATION_MESSAGE);
+            String ID = JOptionPane.showInputDialog(null,"Input the item's ID you want to delete: ","Delete items", JOptionPane.INFORMATION_MESSAGE);
             try {
-                order.removeDVD(title);
-                JOptionPane.showMessageDialog(null, "Disc '" + title + "' is removed.\nTotal cost: " + order.total());
+                order.removeMedia(ID);
+                JOptionPane.showMessageDialog(null, "Item #" + ID + " is removed.\nTotal cost: " + order.total());
                 check = true;
-            } catch (NullPointerException e1) {
-                JOptionPane.showMessageDialog(null,"No discs are removed.\nTotal cost: " + order.total());
+            } catch (NullPointerException e) {
+                JOptionPane.showMessageDialog(null,"No itwms are removed.\nTotal cost: " + order.total());
                 return;
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, "Disc not found!");
+            } catch (NotFoundException e) {
+                JOptionPane.showMessageDialog(null, "Item not found!");
                 check = false;
             }
         } while (!check);
     }
 
     public static void lucky() {
-        if (list.size() == 0) {
+        JOptionPane.showMessageDialog(null, "This feature is under maintainance. It will be available in the near future.");
+        /*if (list.size() == 0) {
             JOptionPane.showMessageDialog(null,"Your order list is empty!");
             return;
         }
@@ -375,11 +397,12 @@ public class Aims {
         } else {
             JOptionPane.showMessageDialog(null,"Yep, you cancelled that.");
             return;
-        }
+        }*/
     }
 
     public static void search() {
-        if (list.size() == 0) {
+        JOptionPane.showMessageDialog(null, "This feature is under maintainance. It will be available in the near future.");
+       /* if (list.size() == 0) {
             JOptionPane.showMessageDialog(null,"Your order list is empty!");
             return;
         }
@@ -397,7 +420,7 @@ public class Aims {
             }
         } else {
             return;
-        }
+        }*/
     }
 
     public static void main(String[] args){

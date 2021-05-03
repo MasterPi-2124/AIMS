@@ -1,6 +1,6 @@
 package hust.soict.it2.aims.list;
 
-import hust.soict.it2.aims.disc.DigitalVideoDisc;
+import hust.soict.it2.aims.media.DigitalVideoDisc;
 import hust.soict.it2.aims.exception.aims.ExcessiveException;
 import hust.soict.it2.aims.exception.aims.NotFoundException;
 import hust.soict.it2.aims.order.Order;
@@ -11,7 +11,7 @@ import java.util.List;
 
 public class orderList {
     private final List<Order> list = new ArrayList<>();
-    private static final int MAX_ORDERS = 5;
+    private static final int MAX_ORDERS = 1;
 
     public boolean full() {
         return list.size() == MAX_ORDERS;
@@ -21,11 +21,8 @@ public class orderList {
         return list.size();
     }
 
-    public void add(Order order) throws Exception {
-        if (full()) throw new ExcessiveException();
+    public void add(Order order){
         list.add(order);
-
-        if (full()) throw new ExcessiveException();
     }
 
     public Order get(int i) {
@@ -45,7 +42,7 @@ public class orderList {
     }
 
     public void search (String title) throws NotFoundException {
-        StringBuilder message = new StringBuilder();
+        /*StringBuilder message = new StringBuilder();
         if (title.equals("")) throw new NotFoundException();
         String[] store;
         String[] temp = title.split(" ");
@@ -69,6 +66,6 @@ public class orderList {
         else {
             message.insert(0, "Here are your results:\n");
             JOptionPane.showMessageDialog(null, message);
-        }
+        }*/
     }
 }

@@ -1,10 +1,10 @@
 package hust.soict.it2.test.disc;
 
-import hust.soict.it2.aims.disc.DigitalVideoDisc;
-import hust.soict.it2.aims.disc.wrapDigitalVideoDisc;
+import hust.soict.it2.aims.media.DigitalVideoDisc;
+import hust.soict.it2.aims.media.wrapDigitalVideoDisc;
 
 import javax.swing.*;
-
+/*
 public class TestPassingParameter {
     public static void main (String[] args) {
         DigitalVideoDisc jungleDVD = new DigitalVideoDisc("Jungle");
@@ -31,3 +31,4 @@ public class TestPassingParameter {
         disc = new DigitalVideoDisc(oldTitle);
     }
 }
+*/

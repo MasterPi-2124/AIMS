@@ -1,8 +1,9 @@
 package hust.soict.it2.aims.order;
 
-import hust.soict.it2.aims.disc.DigitalVideoDisc;
+import hust.soict.it2.aims.media.DigitalVideoDisc;
 import hust.soict.it2.aims.exception.aims.ExcessiveException;
 import hust.soict.it2.aims.exception.aims.NotFoundException;
+import hust.soict.it2.aims.media.Media;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -11,69 +12,45 @@ import java.util.List;
 public class Order {
     public static final int MAX_PER_ORDER = 3;
     private String dateOrder;
-    private final List<DigitalVideoDisc> itemsOrdered = new ArrayList<>();
+    private final List<Media> itemsOrdered = new ArrayList<>();
 
-    public void addDVD(DigitalVideoDisc disc) throws Exception {
-        itemsOrdered.add(disc);
-        dateOrder = new SimpleDateFormat("MMMM-dd-yyyy HH:mm:ss").format(new Date());
+    public boolean full() {
         if (itemsOrdered.size() == MAX_PER_ORDER) {
-            throw new ExcessiveException();
+            return true;
         }
+        return false;
+    }
+    public void addMedia(Media item) throws ExcessiveException {
+        itemsOrdered.add(item);
+        dateOrder = new SimpleDateFormat("MMMM-dd-yyyy HH:mm:ss").format(new Date());
+        if (full()) throw new ExcessiveException();
     }
 
     public String getDateOrder() {
         return dateOrder;
     }
 
-    public void addDVD(List<DigitalVideoDisc> discList) throws Exception {
-        if (discList.size() + itemsOrdered.size() > MAX_PER_ORDER) {
-            int d = MAX_PER_ORDER - itemsOrdered.size();
-            for (int i = 0; i < d; i++) {
-                itemsOrdered.add(discList.get(i));
-            }
-            dateOrder = new SimpleDateFormat("MMMM-dd-yyyy HH:mm:ss").format(new Date());
-            throw new ExcessiveException(String.valueOf(d));
-        }
-        else {
-            itemsOrdered.addAll(discList);
-            dateOrder = new SimpleDateFormat("MMMM-dd-yyyy HH:mm:ss").format(new Date());
-        }
-    }
-
-    public void addDVD(DigitalVideoDisc disc1, DigitalVideoDisc disc2) throws Exception {
-        int d = MAX_PER_ORDER - itemsOrdered.size();
-        if (d == 0) throw new ExcessiveException(String.valueOf(d));
-        else if (d == 1) {
-            itemsOrdered.add(disc1);
-            dateOrder = new SimpleDateFormat("MMMM-dd-yyyy HH:mm:ss").format(new Date());
-            throw new ExcessiveException(String.valueOf(d));
-        } else {
-            itemsOrdered.add(disc1);
-            itemsOrdered.add(disc2);
-            dateOrder = new SimpleDateFormat("MMMM-dd-yyyy HH:mm:ss").format(new Date());
-        }
-    }
-
-    public void removeDVD(String title) throws Exception {
+    public void removeMedia(String ID) throws NotFoundException {
         boolean check = false;
-        if (title.equals("")) throw new NullPointerException();
+        if (ID.equals(null)) throw new NullPointerException();
         for (int i = 0; i < itemsOrdered.size(); i++)
         {
-            if (title.equals(itemsOrdered.get(i).getTitle())) {
+            if (ID.equals(itemsOrdered.get(i).getID())) {
                 check = true;
                 itemsOrdered.remove(i);
+                return;
             }
         }
         if (!check) throw new NotFoundException();
     }
 
-    public List<DigitalVideoDisc> getItemsOrdered() {
+    public List<Media> getItemsOrdered() {
         return itemsOrdered;
     }
 
     public float total() {
         float cost = 0;
-        for (DigitalVideoDisc digitalVideoDisc : itemsOrdered) cost += digitalVideoDisc.getCost();
+        for (Media item : itemsOrdered) cost += item.getCost();
         return cost;
     }
 }

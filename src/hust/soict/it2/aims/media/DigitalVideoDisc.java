@@ -1,51 +1,24 @@
-package hust.soict.it2.aims.disc;
+package hust.soict.it2.aims.media;
 
-import java.security.PublicKey;
-
-public class DigitalVideoDisc{
-
-    private String title;
-    private String category;
+public class DigitalVideoDisc extends Disc {
     private String director;
     private int length;
-    private float cost;
 
-    public DigitalVideoDisc(String title, String category, String director, int length, float cost) {
-        this.title = title;
-        this.category = category;
+    public DigitalVideoDisc(String ID, String title, String category, String director, int length, float cost) {
+        super(ID, title,category,cost);
         this.director = director;
         this.length = length;
-        this.cost = cost;
     }
 
-    public DigitalVideoDisc(String title) {
-        this.title = title;
+    public DigitalVideoDisc() {
+        super();
     }
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-
-     public String getTitle() {
-        return title;
-     }
 
     public String getDirector() {
         return director;
     }
+
     public int getLength() {
         return length;
-    }
-
-    public float getCost() {
-        return cost;
-    }
-
-    public void setCost(Float cost) {
-        this.cost = cost;
     }
 }
