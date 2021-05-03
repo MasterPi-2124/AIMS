@@ -85,7 +85,7 @@ public class Aims {
 
         do {
             check = true;
-            String str = JOptionPane.showInputDialog(null, "Choose Order to modify.", "Modify Order", JOptionPane.PLAIN_MESSAGE);
+            String str = JOptionPane.showInputDialog(null, "Choose Order to modify. (1 ~ " + list.size() + ")", "Modify Order", JOptionPane.PLAIN_MESSAGE);
             try {
                 int option = Integer.parseInt(str);
                 if (option < 1 || option > list.size()) {
@@ -95,6 +95,7 @@ public class Aims {
                     while (true) {
                         do {
                             String string = JOptionPane.showInputDialog(null, "What do you want to do with your order?\n 1. Add an item.\n 2. Modify an item.\n 3. Remove an item.\n 4. Print the Order.\n", "Choose Option", JOptionPane.PLAIN_MESSAGE);
+                            if (string == null) return;
                             switch (string) {
                                 case "1":
                                     addItem(list.get(option - 1));
@@ -106,7 +107,7 @@ public class Aims {
                                     removeItem(list.get(option - 1));
                                     break;
                                 case "4":
-                                    printOrder();
+                                    printOrder(option);
                                     break;
                                 default:
                                     check = false;
@@ -117,9 +118,8 @@ public class Aims {
                 }
             } catch (NumberFormatException e) {
                 check = false;
-                JOptionPane.showMessageDialog(null,"You must type an Integer!");
-            } catch (NullPointerException e) {
-                return;
+                if (str == null) return;
+                JOptionPane.showMessageDialog(null, "You must type an Integer!");
             }
         } while (!check);
     }
@@ -132,7 +132,7 @@ public class Aims {
         String str;
         do {
             check = true;
-            str = JOptionPane.showInputDialog("Choose order:");
+            str = JOptionPane.showInputDialog("Choose order (1 ~ " + list.size() + "):");
             if (str == null) {
                 JOptionPane.showMessageDialog(null, "No orders are removed.");
                 return;
@@ -154,7 +154,6 @@ public class Aims {
     }
 
     public static void printOrder() {
-        //JOptionPane.showMessageDialog(null, "This feature is under maintainance. It will be available in the near future.");
         if (list.size() == 0) {
             JOptionPane.showMessageDialog(null,"Your order list is empty!");
             return;
@@ -163,7 +162,7 @@ public class Aims {
         do {
             check = true;
             try {
-                x = Integer.parseInt(JOptionPane.showInputDialog("Choose order:"));
+                x = Integer.parseInt(JOptionPane.showInputDialog("Choose order (1 ~ " + list.size() + "):"));
                 if (x > list.size() || x == 0) {
                     check = false;
                     JOptionPane.showMessageDialog(null,"Order not found!");
@@ -174,13 +173,34 @@ public class Aims {
             }
         } while (!check);
         StringBuilder message = new StringBuilder();
-        message.append("**********************ORDER #").append(x).append("************************\nDate: ").append(list.get(x - 1).getDateOrder()).append("\nOrdered items:\n");
-        int d = 0;
+        message.append("**********************ORDER #").append(x).append("************************\n")
+               .append("Date: ").append(list.get(x - 1).getDateOrder()).append("\n")
+               .append("Ordered items:\n")
+               .append("+---------------+---------------------------+---------------+\n")
+               .append("|\t\tID\t\t|\t\t\tTitle\t\t\t|\t\tCost\t|\n")
+               .append("+---------------+---------------------------+---------------+\n");
         for (Media item : list.get(x - 1).getItemsOrdered()){
-            
-            message.append(" ").append(++d).append(". DVD - ").append(item.getTitle()).append(" - ").append(item.getCategory()).append(" - ").append(item.getDirector()).append(" - ").append(item.getLength()).append(": $").append(item.getCost()).append("\n");
+            message.append(" ").append(item.getID()).append("\t\t\t\t").append(item.getTitle()).append("\t\t\t\t\t\t").append(item.getCost()).append("\n");
         }
-        message.append("----------\nTotal cost: $").append(list.get(x - 1).total()).append("\n******************************************************");
+        message.append("----------\nTotal cost: $").append(list.get(x - 1).total()).append("\n")
+               .append("******************************************************");
+        System.out.println(message);
+        JOptionPane.showMessageDialog(null,message);
+    }
+
+    public static void printOrder(int x) {
+        StringBuilder message = new StringBuilder();
+        message.append("**********************ORDER #").append(x).append("************************\n")
+                .append("Date: ").append(list.get(x - 1).getDateOrder()).append("\n")
+                .append("Ordered items:\n")
+                .append("+---------------+---------------------------+---------------+\n")
+                .append("|\t\tID\t\t|\t\t\tTitle\t\t\t|\t\tCost\t|\n")
+                .append("+---------------+---------------------------+---------------+\n");
+        for (Media item : list.get(x - 1).getItemsOrdered()){
+            message.append(" ").append(item.getID()).append("\t\t\t\t").append(item.getTitle()).append("\t\t\t\t\t\t").append(item.getCost()).append("\n");
+        }
+        message.append("----------\nTotal cost: $").append(list.get(x - 1).total()).append("\n")
+                .append("******************************************************");
         System.out.println(message);
         JOptionPane.showMessageDialog(null,message);
     }
@@ -248,12 +268,12 @@ public class Aims {
                                             JOptionPane.showMessageDialog(null, "Total cost: " + order.total());
                                         } catch (ExcessiveException e) {
                                             message = new Object[] {
-                                                    "Your book has been added successfully!",
+                                                    "Your disc has been added successfully!",
                                                     "ID: " + id,
                                                     "Title: " + title,
                                                     "Category: " + category,
-                                                    "Authors: " + Authors.getText(),
-                                                    "Content: " + content,
+                                                    "Director: " + director,
+                                                    "Length: " + length,
                                                     "Cost: " + cost,
                                             };
                                             JOptionPane.showMessageDialog(null, message);
@@ -278,7 +298,7 @@ public class Aims {
                                         "Content:", Content,
                                         "Cost:", Cost,
                                 };
-                                option = JOptionPane.showConfirmDialog(null, message, "Add a disc", JOptionPane.OK_CANCEL_OPTION);
+                                option = JOptionPane.showConfirmDialog(null, message, "Add a book", JOptionPane.OK_CANCEL_OPTION);
 
                                 if (option == JOptionPane.OK_OPTION) {
                                     title = Title.getText();
@@ -343,25 +363,108 @@ public class Aims {
     }
 
     public static void modifyItem(Order order) {
-        JOptionPane.showMessageDialog(null, "This feature is under maintainance. It will be available in the near future.");
-        /*do {
+        do {
             check = true;
-            String str = JOptionPane.showInputDialog(null, "Choose item to modify.", "Modify Item", JOptionPane.PLAIN_MESSAGE);
+            String str = JOptionPane.showInputDialog(null, "Choose item to modify. (1 ~ " + order.getItemsOrdered().size() + ")", "Modify Item", JOptionPane.PLAIN_MESSAGE);
             try {
                 int option = Integer.parseInt(str);
                 if (option < 1 || option > order.getItemsOrdered().size()) {
                     check = false;
                     JOptionPane.showMessageDialog(null, "Try again.");
                 } else {
+                    JTextField Title = new JTextField(),
+                            Category = new JTextField(),
+                            Director = new JTextField(),
+                            Length = new JTextField(),
+                            Cost = new JTextField(),
+                            ID = new JTextField(),
+                            Authors = new JTextField(),
+                            Content = new JTextField();
+                    Title.setText(order.getItemsOrdered().get(option - 1).getTitle());
+                    Category.setText(order.getItemsOrdered().get(option - 1).getCategory());
+                    Cost.setText(Float.toString(order.getItemsOrdered().get(option - 1).getCost()));
+                    ID.setText(order.getItemsOrdered().get(option - 1).getID());
 
+                    if (order.getItemsOrdered().get(option - 1).getAuthors() == null) {
+                        Director.setText(order.getItemsOrdered().get(option - 1).getDirector());
+                        Length.setText(Integer.toString(order.getItemsOrdered().get(option - 1).getLength()));
+                        Object[] message = new Object[]{
+                                "Enter information of the Disc. Press Cancel to exit.\n",
+                                "ID", ID,
+                                "Title:", Title,
+                                "Category:", Category,
+                                "Director:", Director,
+                                "Length:", Length,
+                                "Cost:", Cost,
+                        };
+                        int option1 = JOptionPane.showConfirmDialog(null, message, "Modify item", JOptionPane.OK_CANCEL_OPTION);
+
+                        if (option1 == JOptionPane.OK_OPTION) {
+                            title = Title.getText();
+                            category = Category.getText();
+                            director = Director.getText();
+                            int test = Integer.parseInt(ID.getText());
+                            id = ID.getText();
+                            length = Integer.parseInt(Length.getText());
+                            cost = Float.parseFloat(Cost.getText());
+                            order.getItemsOrdered().set(option - 1, new DigitalVideoDisc(id, title, category, director, length, cost));
+                            message = new Object[]{
+                                    "Your disc has been modified successfully!",
+                                    "ID: " + id,
+                                    "Title: " + title,
+                                    "Category: " + category,
+                                    "Director: " + director,
+                                    "Length: " + length,
+                                    "Cost: " + cost,
+                            };
+                            JOptionPane.showMessageDialog(null, message);
+                            JOptionPane.showMessageDialog(null, "Total cost: " + order.total());
+                            return;
+                        } else break;
+                    } else if (order.getItemsOrdered().get(option - 1).getDirector() == null) {
+                        Authors.setText(order.getItemsOrdered().get(option - 1).getAuthors().toString());
+                        Content.setText(order.getItemsOrdered().get(option - 1).getContent());
+                        Object[] message = new Object[]{
+                                "Enter information of the Book. Press Cancel to exit.\n",
+                                "ID", ID,
+                                "Title:", Title,
+                                "Category:", Category,
+                                "Authors:", Authors,
+                                "Content:", Content,
+                                "Cost:", Cost,
+                        };
+                        int option1 = JOptionPane.showConfirmDialog(null, message, "Modify item", JOptionPane.OK_CANCEL_OPTION);
+
+                        if (option1 == JOptionPane.OK_OPTION) {
+                            title = Title.getText();
+                            category = Category.getText();
+                            authors = Authors.getText().split(";");
+                            content = Content.getText();
+                            int test = Integer.parseInt(ID.getText());
+                            id = ID.getText();
+                            cost = Float.parseFloat(Cost.getText());
+                            order.getItemsOrdered().set(option - 1, new Book(id, title, category, authors, content, cost));
+                            message = new Object[] {
+                                    "Your book has been modified successfully!",
+                                    "ID: " + id,
+                                    "Title: " + title,
+                                    "Category: " + category,
+                                    "Authors: " + Authors.getText(),
+                                    "Content: " + content,
+                                    "Cost: " + cost,
+                            };
+                            JOptionPane.showMessageDialog(null, message);
+                            JOptionPane.showMessageDialog(null, "Total cost: " + order.total());
+                            return;
+                        } else break;
+                    }
                 }
             } catch (NumberFormatException e) {
                 check = false;
+                if (str == null) return;
                 JOptionPane.showMessageDialog(null,"You must type an Integer!");
-            } catch (NullPointerException e) {
-                return;
             }
-        } while (!check);*/
+        } while (!check);
     }
 
     public static void removeItem(Order order){
@@ -382,8 +485,8 @@ public class Aims {
     }
 
     public static void lucky() {
-        JOptionPane.showMessageDialog(null, "This feature is under maintainance. It will be available in the near future.");
-        /*if (list.size() == 0) {
+        //JOptionPane.showMessageDialog(null, "This feature is under maintainance. It will be available in the near future.");
+        if (list.size() == 0) {
             JOptionPane.showMessageDialog(null,"Your order list is empty!");
             return;
         }
@@ -392,17 +495,16 @@ public class Aims {
             int i = (int) (Math.random() * (list.size() - 1));
             int j = (int) (Math.random() * (list.get(i).getItemsOrdered().size() - 1));
             JOptionPane.showMessageDialog(null,
-                    "You got an ordered item for free!\nYour item is:\n  - Order " + (i + 1) + "\n  - Title: " + list.get(i).getItemsOrdered().get(j).getTitle() + "\n  - Category: " + list.get(i).getItemsOrdered().get(j).getCategory() + "\n  - Director: " + list.get(i).getItemsOrdered().get(j).getDirector() + "\n  - Length: " + list.get(i).getItemsOrdered().get(j).getLength());
+                    "You got an ordered item for free!\nYour item is:\n  - Order " + (i + 1) + "\n  - ID: " + list.get(i).getItemsOrdered().get(j).getID() + "\n - Title: " + list.get(i).getItemsOrdered().get(j).getTitle());
             list.get(i).getItemsOrdered().get(j).setCost(0.0F);
         } else {
             JOptionPane.showMessageDialog(null,"Yep, you cancelled that.");
             return;
-        }*/
+        }
     }
 
     public static void search() {
-        JOptionPane.showMessageDialog(null, "This feature is under maintainance. It will be available in the near future.");
-       /* if (list.size() == 0) {
+       if (list.size() == 0) {
             JOptionPane.showMessageDialog(null,"Your order list is empty!");
             return;
         }
@@ -410,7 +512,7 @@ public class Aims {
         Object[] message = new Object[] {
           "Type item title:", item
         };
-        int option = JOptionPane.showConfirmDialog(null,message,"Lucky",JOptionPane.OK_CANCEL_OPTION);
+        int option = JOptionPane.showConfirmDialog(null,message,"Search for item",JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
             String title = item.getText();
             try {
@@ -420,7 +522,7 @@ public class Aims {
             }
         } else {
             return;
-        }*/
+        }
     }
 
     public static void main(String[] args){

@@ -1,6 +1,5 @@
 package hust.soict.it2.aims.media;
 
-
 public class Media {
     private String title;
     private String category;
@@ -18,12 +17,22 @@ public class Media {
 
     }
 
-    public String getDirector () {
+    public String[] getAuthors() {
+        Book book = new Book();
+        return book.getAuthors();
+    }
+
+    public String getContent() {
+        Book book = new Book();
+        return book.getContent();
+    }
+
+    public String getDirector() {
         DigitalVideoDisc disc = new DigitalVideoDisc();
         return disc.getDirector();
     }
 
-    public int getLength () {
+    public int getLength() {
         DigitalVideoDisc disc = new DigitalVideoDisc();
         return disc.getLength();
     }

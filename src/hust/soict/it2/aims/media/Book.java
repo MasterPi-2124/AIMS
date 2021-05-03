@@ -12,6 +12,10 @@ public class Book extends Media{
         this.content = content;
     }
 
+    public Book() {
+
+    }
+
     public String[] getAuthors() {
         return authors;
     }

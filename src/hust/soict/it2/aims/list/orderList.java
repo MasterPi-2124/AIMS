@@ -3,6 +3,7 @@ package hust.soict.it2.aims.list;
 import hust.soict.it2.aims.media.DigitalVideoDisc;
 import hust.soict.it2.aims.exception.aims.ExcessiveException;
 import hust.soict.it2.aims.exception.aims.NotFoundException;
+import hust.soict.it2.aims.media.Media;
 import hust.soict.it2.aims.order.Order;
 
 import javax.swing.*;
@@ -11,7 +12,7 @@ import java.util.List;
 
 public class orderList {
     private final List<Order> list = new ArrayList<>();
-    private static final int MAX_ORDERS = 1;
+    private static final int MAX_ORDERS = 5;
 
     public boolean full() {
         return list.size() == MAX_ORDERS;
@@ -42,14 +43,14 @@ public class orderList {
     }
 
     public void search (String title) throws NotFoundException {
-        /*StringBuilder message = new StringBuilder();
+        StringBuilder message = new StringBuilder();
         if (title.equals("")) throw new NotFoundException();
         String[] store;
         String[] temp = title.split(" ");
         for(int i = 0; i < list.size(); i++) {
-            for (DigitalVideoDisc disc : list.get(i).getItemsOrdered()) {
+            for (Media item : list.get(i).getItemsOrdered()) {
                 boolean check = false;
-                store = disc.getTitle().split(" ");
+                store = item.getTitle().split(" ");
                 for (String str : temp) {
                     check = false;
                     for (String str1 : store) {
@@ -58,7 +59,7 @@ public class orderList {
                     if (!check) break;
                 }
                 if (check) {
-                    message.append("  - Order ").append(i + 1).append(", item: ").append(disc.getTitle()).append(" - ").append(disc.getCategory()).append(" - ").append(disc.getDirector()).append(" - ").append(disc.getLength()).append(": ").append(disc.getCost()).append("\n");
+                    message.append("  - Order ").append(i + 1).append(", ID: ").append(item.getID()).append(" - ").append(item.getTitle()).append(": ").append(item.getCost()).append("\n");
                 }
             }
         }
@@ -66,6 +67,6 @@ public class orderList {
         else {
             message.insert(0, "Here are your results:\n");
             JOptionPane.showMessageDialog(null, message);
-        }*/
+        }
     }
 }
